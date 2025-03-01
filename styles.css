@@ -1,1 +1,217 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #333;
+  background-image: url("oo.gif");
+  background-size: cover;
+  background-position: center;
+  overflow-y: auto;
+}
 
+.container {
+  text-align: center;
+  color: white;
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+}
+
+.description-page {
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px;
+}
+
+.game-page {
+  display: none;
+  margin: 20px;
+}
+
+.mode-selector {
+  margin-bottom: 20px;
+}
+
+.mode-selector select {
+  padding: 5px;
+  font-size: 1em;
+  width: 100%;
+  max-width: 200px;
+}
+
+.color-picker {
+  margin-bottom: 20px;
+}
+
+.color-picker label {
+  display: block;
+  margin: 5px 0;
+}
+
+.color-picker input {
+  margin-right: 10px;
+}
+
+.multiplayer-controls {
+  display: none;
+  margin-bottom: 20px;
+}
+
+.multiplayer-controls input {
+  padding: 5px;
+  margin: 5px;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 5px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 2px solid black;
+  font-size: 2em;
+  cursor: pointer;
+  color: black;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.cell.X, .cell.O {
+  pointer-events: none; /* Prevent further clicks on occupied cells */
+}
+
+.chat-box {
+  display: none;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 400px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#chatMessages {
+  max-height: 100px;
+  overflow-y: auto;
+  color: white;
+  text-align: left;
+}
+
+#chatInput {
+  width: 70%;
+  padding: 5px;
+}
+
+.controls {
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #4d94ff;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #3d7ddb;
+}
+
+#status {
+  margin-top: 20px;
+  font-size: 1.2em;
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 1em;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+@keyframes pulsate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.pulsate {
+  animation: pulsate 1.5s infinite;
+  background-color: #ff4d4d;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+.balloon-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  width: 10vw;
+  height: 14vw;
+  background-color: #ff4d4d;
+  border-radius: 50%;
+  animation: float 3s infinite;
+}
+
+.balloon::after {
+  content: "";
+  position: absolute;
+  bottom: -2vw;
+  left: 50%;
+  width: 0.4vw;
+  height: 4vw;
+  background-color: #333;
+}
+
+.balloon:nth-child(2) {
+  background-color: #4d94ff;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.balloon:nth-child(3) {
+  background-color: #ffcc00;
+  left: 40%;
+  animation-delay: 2s;
+}
+
+.balloon:nth-child(4) {
+  background-color: #33cc33;
+  left: 60%;
+  animation-delay: 0.5s;
+}
+
+.balloon:nth-child(5) {
+  background-color: #cc33ff;
+  left: 80%;
+  animation-delay: 1.5s;
+}
