@@ -6,62 +6,106 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for local testing; restrict in production
+    origin: "*", // Restrict in production
     methods: ["GET", "POST"],
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
+const players = {}; // Store player codes and sockets
 const games = {}; // Store active games by pin code
 
 io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
-  socket.on("joinGame", ({ pinCode, playerId }) => {
-    if (!games[pinCode]) {
-      games[pinCode] = {
-        players: [{ socket, id: playerId }],
-        board: Array(9).fill(null),
-        turn: "X",
-      };
-      socket.emit("status", "Waiting for an opponent to join the cosmos...");
-    } else if (games[pinCode].players.length === 1 && games[pinCode].players[0].id !== playerId) {
-      games[pinCode].players.push({ socket, id: playerId });
-      const [player1, player2] = games[pinCode].players;
-      player1.socket.emit("gameStart", { board: games[pinCode].board, turn: "X", symbol: "X" });
-      player2.socket.emit("gameStart", { board: games[pinCode].board, turn: "X", symbol: "O" });
-    } else {
-      socket.emit("status", "This cosmic arena is full or you’re already in it!");
+  socket.on("registerCode", ({ pinCode, playerId }) => {
+    if (players[pinCode] && players[pinCode].playerId !== playerId) {
+      socket.emit("error", "This game code is already in use. Try a different one.");
+      return;
     }
+    players[pinCode] = { socket, playerId };
+    socket.emit("codeRegistered");
+  });
+
+  socket.on("joinGame", ({ myPinCode, opponentPinCode, playerId }) => {
+    if (!players[myPinCode] || players[myPinCode].playerId !== playerId) {
+      socket.emit("error", "Your game code is not registered. Generate a new code.");
+      return;
+    }
+    if (!players[opponentPinCode]) {
+      socket.emit("error", "Friend's game code not found. Please check the code.");
+      return;
+    }
+    if (opponentPinCode === myPinCode) {
+      socket.emit("error", "You cannot join your own game!");
+      return;
+    }
+
+    const player1 = players[myPinCode];
+    const player2 = players[opponentPinCode];
+
+    const gameId = `${myPinCode}-${opponentPinCode}`;
+    if (games[gameId]) {
+      socket.emit("error", "This game is already in progress.");
+      return;
+    }
+
+    games[gameId] = {
+      players: [
+        { socket: player1.socket, id: player1.playerId, pinCode: myPinCode, symbol: "X" },
+        { socket: player2.socket, id: player2.playerId, pinCode: opponentPinCode, symbol: "O" },
+      ],
+      board: Array(9).fill(null),
+      turn: "X",
+    };
+
+    games[gameId].players.forEach((p) => {
+      p.socket.emit("gameStart", {
+        board: games[gameId].board,
+        turn: "X",
+        symbol: p.symbol,
+      });
+    });
   });
 
   socket.on("makeMove", ({ pinCode, index, player }) => {
-    const game = games[pinCode];
+    const game = Object.values(games).find(
+      (g) => g.players.some((p) => p.pinCode === pinCode && p.symbol === player)
+    );
     if (game && game.turn === player && !game.board[index]) {
       game.board[index] = player;
       game.turn = player === "X" ? "O" : "X";
       game.players.forEach((p) => p.socket.emit("updateBoard", game.board));
       if (checkWin(game.board, player)) {
-        game.players.forEach((p) => p.socket.emit("gameOver", `${player} Conquers the Cosmos!`));
+        game.players.forEach((p) => p.socket.emit("gameOver", `${player} Wins!`));
       } else if (game.board.every((cell) => cell)) {
-        game.players.forEach((p) => p.socket.emit("gameOver", "Cosmic Stalemate!"));
+        game.players.forEach((p) => p.socket.emit("gameOver", "It's a Draw!"));
       }
     }
   });
 
   socket.on("chatMessage", ({ pinCode, message }) => {
-    if (games[pinCode]) {
-      games[pinCode].players.forEach((p) => p.socket.emit("chat", message));
+    const game = Object.values(games).find((g) => g.players.some((p) => p.pinCode === pinCode));
+    if (game) {
+      game.players.forEach((p) => p.socket.emit("chat", message));
     }
   });
 
   socket.on("disconnect", () => {
-    for (let pin in games) {
-      const game = games[pin];
+    for (let pin in players) {
+      if (players[pin].socket === socket) {
+        delete players[pin];
+        break;
+      }
+    }
+    for (let gameId in games) {
+      const game = games[gameId];
       const playerIndex = game.players.findIndex((p) => p.socket === socket);
       if (playerIndex !== -1) {
         game.players.splice(playerIndex, 1);
         if (game.players.length === 0) {
-          delete games[pin];
+          delete games[gameId];
         } else {
           game.players.forEach((p) => p.socket.emit("opponentDisconnected"));
         }
@@ -75,4 +119,4 @@ function checkWin(board, player) {
   return wins.some((combo) => combo.every((i) => board[i] === player));
 }
 
-server.listen(3000, () => console.log("Cosmic server running on port 3000"));
+server.listen(3000, () => console.log("Server running on port 3000"));
