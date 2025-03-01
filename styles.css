@@ -22,14 +22,14 @@ body {
   width: 100%;
   height: 100%;
   background: url('stars.png') repeat;
-  opacity: 0.2;
+  opacity: 0.15;
   pointer-events: none;
   animation: starTwinkle 8s infinite;
 }
 
 @keyframes starTwinkle {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.4; }
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.3; }
 }
 
 .container {
@@ -43,7 +43,7 @@ body {
 }
 
 .description-page, .game-page {
-  background: rgba(30, 30, 47, 0.9);
+  background: rgba(30, 30, 47, 0.95);
   border: 2px solid #5e5e8d;
   border-radius: 12px;
   padding: 20px;
@@ -63,12 +63,12 @@ body {
 h1 {
   font-size: 2.2em;
   color: #ff4d4d;
-  text-shadow: 0 0 8px rgba(255, 77, 77, 0.5);
+  text-shadow: 0 0 5px rgba(255, 77, 77, 0.4);
   margin-bottom: 15px;
 }
 
 h2, h3 {
-  font-size: 1.2em;
+  font-size: 1.3em;
   color: #4d94ff;
   margin-bottom: 10px;
 }
@@ -88,11 +88,15 @@ a:hover {
   text-decoration: underline;
 }
 
-.mode-selector, .color-picker, .multiplayer-controls {
+.mode-section, .color-section, .multiplayer-section, .donate-section {
   margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(59, 59, 94, 0.2);
+  border-radius: 8px;
+  border: 1px solid #5e5e8d;
 }
 
-.mode-selector select, .multiplayer-controls input {
+.mode-section select, .multiplayer-section input {
   padding: 8px;
   font-size: 1em;
   background: #3b3b5e;
@@ -100,26 +104,28 @@ a:hover {
   border: 1px solid #5e5e8d;
   border-radius: 5px;
   transition: box-shadow 0.3s;
+  width: 100%;
+  max-width: 200px;
 }
 
-.mode-selector select:hover, .multiplayer-controls input:hover {
+.mode-section select:hover, .multiplayer-section input:hover {
   box-shadow: 0 0 10px #5e5e8d;
 }
 
-.color-picker label {
+.color-section label {
   display: block;
   margin: 5px 0;
   color: #d0d0e0;
 }
 
-.color-picker input {
+.color-section input {
   margin-right: 10px;
   border: none;
   background: none;
   cursor: pointer;
 }
 
-.multiplayer-controls {
+.multiplayer-section {
   display: none;
 }
 
@@ -131,6 +137,12 @@ a:hover {
   border-radius: 5px;
   margin: 10px 0;
   word-break: break-all;
+}
+
+.multiplayer-status {
+  font-size: 1em;
+  color: #ffcc00;
+  margin-top: 10px;
 }
 
 .game-area {
@@ -170,7 +182,7 @@ a:hover {
   color: transparent;
   transition: all 0.3s ease;
   border-radius: 8px;
-  touch-action: manipulation; /* Prevent iPhone zoom on double-tap */
+  touch-action: manipulation;
 }
 
 .cell:hover {
@@ -183,20 +195,50 @@ a:hover {
   text-shadow: 0 0 8px currentColor;
 }
 
-.chat-box {
+.chat-sidebar {
+  position: relative;
+}
+
+.chat-toggle {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #ff4d4d;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.3s;
+}
+
+.chat-toggle:hover {
+  background: #e03e3e;
+}
+
+.chat-content {
   display: none;
   width: 200px;
-  background: rgba(30, 30, 47, 0.9);
+  background: rgba(30, 30, 47, 0.95);
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ff4d4d;
   box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.chat-content.active {
+  display: block;
 }
 
 @media (max-width: 600px) {
-  .chat-box {
+  .chat-content {
     width: 100%;
     max-width: 300px;
+    position: static;
   }
 }
 
@@ -259,9 +301,8 @@ button:hover {
   text-shadow: 0 0 5px #ffcc00;
 }
 
-.donate-container {
+.donate-section {
   margin-top: 20px;
-  position: relative;
 }
 
 .donate-qr {
