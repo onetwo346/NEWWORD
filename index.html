@@ -1,1 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>XOwars</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S5QGK47FS8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-S5QGK47FS8');
+    </script>
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Description Page -->
+      <div class="description-page" id="descriptionPage">
+        <h1>Welcome to XOwars!</h1>
+        <p>
+          XOwars is a classic tic-tac-toe game with three exciting modes: battle a friend locally, challenge our smart AI, or play online with a friend anywhere in the world using a pin code! Get three of your symbols (X or O) in a row—horizontally, vertically, or diagonally—to win.
+        </p>
+        <p>
+          <strong>How to Play:</strong>
+          <ol>
+            <li>Choose your colors for Player X and Player O.</li>
+            <li>Click "Start Game" to begin.</li>
+            <li>Select a mode: Two-Player (local), AI, or Online Multiplayer.</li>
+            <li>For online play, generate a pin code or join with a friend’s code.</li>
+            <li>Take turns placing your symbol until someone wins or it’s a draw.</li>
+          </ol>
+        </p>
+        <p>Contact me at <a href="mailto:cosmoscoderr@gmail.com">cosmoscoderr@gmail.com</a> for feedback!</p>
+        <button id="startBtn" class="pulsate">Start Game</button>
+      </div>
 
+      <!-- Game Page -->
+      <div class="game-page" id="gamePage">
+        <h1>XOwars</h1>
+        <div class="mode-selector">
+          <h2>Select Mode:</h2>
+          <select id="modeSelect">
+            <option value="twoPlayer">Two-Player Mode (Local)</option>
+            <option value="ai">AI Mode</option>
+            <option value="online">Online Multiplayer</option>
+          </select>
+          <h2>AI Difficulty:</h2>
+          <select id="difficultySelect">
+            <option value="beginner">Beginner (Easy)</option>
+            <option value="amateur">Amateur (Medium)</option>
+            <option value="pro">Pro (Hard)</option>
+          </select>
+        </div>
+        <div class="color-picker">
+          <h2>Choose Your Colors:</h2>
+          <label for="colorX">Player X Color:</label>
+          <input type="color" id="colorX" value="#ff4d4d" />
+          <label for="colorO">Player O Color:</label>
+          <input type="color" id="colorO" value="#4d94ff" />
+          <button id="applyColors">Apply Colors</button>
+        </div>
+        <div class="multiplayer-controls" id="multiplayerControls">
+          <button id="generatePinBtn">Generate Pin Code</button>
+          <input type="text" id="pinInput" placeholder="Enter Pin Code" />
+          <button id="joinBtn">Join Game</button>
+        </div>
+        <div class="game-board" id="gameBoard">
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div Chiarlass="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+          <div class="cell" data-cell></div>
+        </div>
+        <div class="chat-box" id="chatBox">
+          <div id="chatMessages"></div>
+          <input type="text" id="chatInput" placeholder="Type a message..." />
+          <button id="sendChat">Send</button>
+        </div>
+        <div class="controls">
+          <button id="restartBtn">Restart</button>
+          <button id="quitBtn">Quit</button>
+        </div>
+        <p id="status">Player X's turn</p>
+        <img src="donate.jpg" alt="Donate QR Code" class="donate-qr" />
+        <p class="footer">Designed by Nana Kofi Fosu</p>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
