@@ -18,6 +18,8 @@ const chatBox = document.getElementById("chatBox");
 const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendChatBtn = document.getElementById("sendChat");
+const clickSound = document.getElementById("clickSound");
+const winSound = document.getElementById("winSound");
 
 let isXNext = true;
 let gameActive = true;
@@ -29,7 +31,7 @@ let aiDifficulty = "beginner";
 let playerSymbol = null;
 let currentPinCode = null;
 
-const socket = io("http://localhost:3000"); // Replace with your server URL later
+const socket = io("http://localhost:3000"); // Replace with your hosted server URL later
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
@@ -42,6 +44,7 @@ startBtn.addEventListener("click", () => {
   descriptionPage.style.display = "none";
   gamePage.style.display = "block";
   toggleMultiplayerControls();
+  clickSound.play();
 });
 
 // Mode Selector
@@ -67,14 +70,15 @@ function toggleMultiplayerControls() {
 // Generate Pin Code
 generatePinBtn.addEventListener("click", () => {
   currentPinCode = generatePinCode();
-  socket.emit("joinGame", currentPinCode);
-  statusDisplay.innerText = `Your Pin Code: ${currentPinCode}. Share it with a friend!`;
+  socket.emit("joinGame", { pinCode: currentPinCode, playerId: socket.id });
+  statusDisplay.innerText = `Cosmic Pin: ${currentPinCode}. Share with your opponent!`;
+  clickSound.play();
 });
 
 function generatePinCode() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let pin = "";
-  for (let i = 0; i < 6; i++) { // Fixed loop condition
+  for (let i = 0; i < 6; i++) {
     pin += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return pin;
@@ -82,10 +86,13 @@ function generatePinCode() {
 
 // Join Game
 joinBtn.addEventListener("click", () => {
-  currentPinCode = pinInput.value.trim();
+  currentPinCode = pinInput.value.trim().toUpperCase();
   if (currentPinCode) {
-    socket.emit("joinGame", currentPinCode);
-    statusDisplay.innerText = "Attempting to join game...";
+    socket.emit("joinGame", { pinCode: currentPinCode, playerId: socket.id });
+    statusDisplay.innerText = "Connecting to the cosmos...";
+    clickSound.play();
+  } else {
+    statusDisplay.innerText = "Please enter a valid Cosmic Pin!";
   }
 });
 
@@ -97,30 +104,32 @@ function drawSymbol(event) {
   if (cell.classList.contains("X") || cell.classList.contains("O")) return;
 
   if (isOnlineMode) {
-    if (playerSymbol !== (isXNext ? "X" : "O")) return; // Only allow player's turn
+    if (playerSymbol !== (isXNext ? "X" : "O")) return;
     socket.emit("makeMove", { pinCode: currentPinCode, index, player: playerSymbol });
   } else {
     const currentClass = isXNext ? "X" : "O";
     cell.classList.add(currentClass);
     cell.style.color = isXNext ? colorX : colorO;
     cell.textContent = currentClass;
+    clickSound.play();
 
     if (checkWin(currentClass)) {
-      statusDisplay.innerText = `${currentClass} Wins!`;
+      statusDisplay.innerText = `${currentClass} Conquers the Cosmos!`;
       gameActive = false;
       showBalloons();
+      winSound.play();
       return;
     }
 
     if ([...cells].every((cell) => cell.classList.contains("X") || cell.classList.contains("O"))) {
-      statusDisplay.innerText = "Draw!";
+      statusDisplay.innerText = "Cosmic Stalemate!";
       gameActive = false;
       setTimeout(restartGame, 2000);
       return;
     }
 
     isXNext = !isXNext;
-    statusDisplay.innerText = `Player ${isXNext ? "X" : "O"}'s turn`;
+    statusDisplay.innerText = `Player ${isXNext ? "X" : "O"}: Deploy Your Energy!`;
 
     if (isAIMode && !isXNext) {
       setTimeout(makeAIMove, 500);
@@ -228,7 +237,7 @@ function restartGame() {
   isXNext = true;
   gameActive = true;
   playerSymbol = null;
-  statusDisplay.innerText = `Player X's turn`;
+  statusDisplay.innerText = `Player X: Deploy Your Energy!`;
   cells.forEach((cell) => {
     cell.classList.remove("X", "O");
     cell.textContent = "";
@@ -237,13 +246,14 @@ function restartGame() {
   removeBalloons();
   if (isOnlineMode && currentPinCode) {
     chatMessages.innerHTML = "";
-    socket.emit("joinGame", currentPinCode); // Rejoin same game
+    socket.emit("joinGame", { pinCode: currentPinCode, playerId: socket.id });
   }
+  clickSound.play();
 }
 
 // Quit Game
 quitBtn.addEventListener("click", () => {
-  if (confirm("Are you sure you want to quit?")) {
+  if (confirm("Are you sure you want to abandon the mission?")) {
     window.close();
   }
 });
@@ -259,6 +269,7 @@ applyColorsBtn.addEventListener("click", () => {
       cell.style.color = colorO;
     }
   });
+  clickSound.play();
 });
 
 // Balloons Animation
@@ -281,6 +292,10 @@ function removeBalloons() {
 }
 
 // Socket.IO Events
+socket.on("connect", () => {
+  console.log("Connected to server:", socket.id);
+});
+
 socket.on("status", (message) => {
   statusDisplay.innerText = message;
 });
@@ -297,12 +312,19 @@ socket.on("updateBoard", (board) => {
   updateBoard(board);
   isXNext = !isXNext;
   statusDisplay.innerText = `Player ${isXNext ? "X" : "O"}'s turn`;
+  clickSound.play();
 });
 
 socket.on("gameOver", (message) => {
   statusDisplay.innerText = message;
   gameActive = false;
   showBalloons();
+  winSound.play();
+});
+
+socket.on("opponentDisconnected", () => {
+  statusDisplay.innerText = "Opponent disconnected! Restart to find a new match.";
+  gameActive = false;
 });
 
 function updateBoard(board) {
@@ -322,6 +344,7 @@ sendChatBtn.addEventListener("click", () => {
   if (message && isOnlineMode) {
     socket.emit("chatMessage", { pinCode: currentPinCode, message: `${playerSymbol}: ${message}` });
     chatInput.value = "";
+    clickSound.play();
   }
 });
 
