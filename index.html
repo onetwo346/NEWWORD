@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>XOwars: Cosmic Battle</title>
+    <title>XOwars</title>
     <link rel="stylesheet" href="styles.css" />
-    <!-- Google Fonts for Futuristic Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- Google Fonts for Clean, Readable Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
     <!-- Socket.IO -->
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -20,85 +20,89 @@
   </head>
   <body>
     <div class="container">
-      <!-- Cosmic Background Overlay -->
-      <div class="cosmic-overlay"></div>
+      <!-- Background Overlay -->
+      <div class="background-overlay"></div>
 
       <!-- Description Page -->
       <div class="description-page" id="descriptionPage">
-        <h1>XOwars: Cosmic Battle</h1>
+        <h1>XOwars</h1>
         <p>
-          Welcome to the ultimate tic-tac-toe showdown in the stars! Choose your mode: battle a friend locally, challenge a galactic AI, or connect across the cosmos with a pin code for online play. Align three symbols (X or O) to claim victory in this interstellar arena.
+          Welcome to XOwars, a fun tic-tac-toe game! Play with a friend on the same device, challenge the computer, or connect with a friend online using game codes.
         </p>
         <p>
           <strong>How to Play:</strong>
           <ol>
-            <li>Pick your cosmic colors for X and O.</li>
-            <li>Launch into the game with "Start Battle."</li>
-            <li>Select your mode: Local, AI, or Online Multiplayer.</li>
-            <li>For online play, generate a pin code or join a friend’s game.</li>
-            <li>Take turns until a victor emerges or the cosmos declares a draw.</li>
+            <li>Choose colors for Player X and Player O.</li>
+            <li>Click "Start Game" to begin.</li>
+            <li>Pick your mode: Local, Computer, or Online.</li>
+            <li>For online play, generate a game code, share it with a friend, and enter their code to connect.</li>
+            <li>Take turns to get three symbols in a row and win!</li>
           </ol>
         </p>
-        <p>Contact the Cosmic Coder at <a href="mailto:cosmoscoderr@gmail.com">cosmoscoderr@gmail.com</a> for feedback!</p>
-        <button id="startBtn" class="pulsate">Start Battle</button>
+        <p>Questions? Email me at <a href="mailto:cosmoscoderr@gmail.com">cosmoscoderr@gmail.com</a>.</p>
+        <button id="startBtn" class="start-btn">Start Game</button>
       </div>
 
       <!-- Game Page -->
       <div class="game-page" id="gamePage">
-        <h1>XOwars: Cosmic Battle</h1>
+        <h1>XOwars</h1>
         <div class="mode-selector">
-          <h2>Select Your Arena:</h2>
+          <h2>Choose Mode:</h2>
           <select id="modeSelect">
-            <option value="twoPlayer">Local Battle</option>
-            <option value="ai">Galactic AI</option>
-            <option value="online">Cosmic Multiplayer</option>
+            <option value="twoPlayer">Play Locally</option>
+            <option value="ai">Play Computer</option>
+            <option value="online">Play Online</option>
           </select>
-          <h2>AI Challenge Level:</h2>
+          <h2>Computer Difficulty:</h2>
           <select id="difficultySelect">
-            <option value="beginner">Stellar Novice</option>
-            <option value="amateur">Nebula Warrior</option>
-            <option value="pro">Cosmic Master</option>
+            <option value="beginner">Easy</option>
+            <option value="amateur">Medium</option>
+            <option value="pro">Hard</option>
           </select>
         </div>
         <div class="color-picker">
-          <h2>Choose Your Cosmic Colors:</h2>
-          <label for="colorX">X Energy:</label>
+          <h2>Pick Your Colors:</h2>
+          <label for="colorX">Player X Color:</label>
           <input type="color" id="colorX" value="#ff4d4d" />
-          <label for="colorO">O Energy:</label>
+          <label for="colorO">Player O Color:</label>
           <input type="color" id="colorO" value="#4d94ff" />
-          <button id="applyColors">Energize Colors</button>
+          <button id="applyColors">Set Colors</button>
         </div>
         <div class="multiplayer-controls" id="multiplayerControls">
-          <button id="generatePinBtn">Generate Cosmic Pin</button>
-          <input type="text" id="pinInput" placeholder="Enter Cosmic Pin" />
-          <button id="joinBtn">Join the Cosmos</button>
+          <button id="generatePinBtn">Generate Game Code</button>
+          <p id="generatedCode" class="generated-code"></p>
+          <input type="text" id="pinInput" placeholder="Enter Friend's Code" />
+          <button id="joinBtn">Join Game</button>
         </div>
-        <div class="game-board" id="gameBoard">
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div>
-          <div class="cell" data-cell></div> <!-- Fixed typo: Chiarlass → class -->
-        </div>
-        <div class="chat-box" id="chatBox">
-          <div id="chatMessages"></div>
-          <input type="text" id="chatInput" placeholder="Transmit Message..." />
-          <button id="sendChat">Send</button>
+        <div class="game-area">
+          <div class="game-board" id="gameBoard">
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+          </div>
+          <div class="chat-box" id="chatBox">
+            <h3>Chat</h3>
+            <div id="chatMessages"></div>
+            <input type="text" id="chatInput" placeholder="Type a message..." />
+            <button id="sendChat">Send</button>
+          </div>
         </div>
         <div class="controls">
-          <button id="restartBtn">Restart Mission</button>
-          <button id="quitBtn">Abandon Ship</button>
+          <button id="restartBtn">Restart</button>
+          <button id="quitBtn">Quit</button>
         </div>
-        <p id="status">Player X: Deploy Your Energy!</p>
+        <p id="status">Player X's Turn</p>
         <div class="donate-container">
           <img src="donate.jpg" alt="Donate QR Code" class="donate-qr" />
-          <p class="donate-text">Support the Cosmic Coder!</p>
+          <p class="donate-text">Support the Developer!</p>
         </div>
-        <p class="footer">Crafted by Nana Kofi Fosu, Galactic Architect</p>
+        <p class="footer">Created by Nana Kofi Fosu</p>
       </div>
     </div>
     <audio id="clickSound" src="click.mp3"></audio>
