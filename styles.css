@@ -5,50 +5,50 @@
 }
 
 body {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Poppins', sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a0b2e 0%, #2e1a47 100%);
+  background: linear-gradient(135deg, #1e1e2f 0%, #3b3b5e 100%);
   overflow-y: auto;
   position: relative;
 }
 
-.cosmic-overlay {
+.background-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: url('stars.png') repeat;
-  opacity: 0.3;
+  opacity: 0.2;
   pointer-events: none;
-  animation: starTwinkle 10s infinite;
+  animation: starTwinkle 8s infinite;
 }
 
 @keyframes starTwinkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.5; }
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.4; }
 }
 
 .container {
   text-align: center;
-  color: #e0e0ff;
+  color: #ffffff;
   width: 100%;
-  max-width: 700px;
+  max-width: 600px;
   padding: 20px;
   position: relative;
   z-index: 1;
 }
 
 .description-page, .game-page {
-  background: rgba(20, 10, 40, 0.8);
-  border: 2px solid #6a5acd;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
-  backdrop-filter: blur(5px);
+  background: rgba(30, 30, 47, 0.9);
+  border: 2px solid #5e5e8d;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
 }
 
 .description-page {
@@ -61,22 +61,22 @@ body {
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2.2em;
   color: #ff4d4d;
-  text-shadow: 0 0 10px #ff4d4d, 0 0 20px #6a5acd;
-  margin-bottom: 20px;
+  text-shadow: 0 0 8px rgba(255, 77, 77, 0.5);
+  margin-bottom: 15px;
 }
 
-h2 {
+h2, h3 {
   font-size: 1.2em;
   color: #4d94ff;
-  text-shadow: 0 0 5px #4d94ff;
+  margin-bottom: 10px;
 }
 
 p, ol {
-  font-family: 'Roboto Mono', monospace;
   font-size: 1em;
   line-height: 1.6;
+  color: #d0d0e0;
 }
 
 a {
@@ -94,23 +94,22 @@ a:hover {
 
 .mode-selector select, .multiplayer-controls input {
   padding: 8px;
-  font-family: 'Roboto Mono', monospace;
   font-size: 1em;
-  background: #2e1a47;
-  color: #e0e0ff;
-  border: 1px solid #6a5acd;
+  background: #3b3b5e;
+  color: #ffffff;
+  border: 1px solid #5e5e8d;
   border-radius: 5px;
   transition: box-shadow 0.3s;
 }
 
 .mode-selector select:hover, .multiplayer-controls input:hover {
-  box-shadow: 0 0 10px #6a5acd;
+  box-shadow: 0 0 10px #5e5e8d;
 }
 
 .color-picker label {
   display: block;
   margin: 5px 0;
-  font-family: 'Roboto Mono', monospace;
+  color: #d0d0e0;
 }
 
 .color-picker input {
@@ -124,67 +123,105 @@ a:hover {
   display: none;
 }
 
+.generated-code {
+  font-size: 1.1em;
+  color: #ffcc00;
+  background: #2e2e47;
+  padding: 8px;
+  border-radius: 5px;
+  margin: 10px 0;
+  word-break: break-all;
+}
+
+.game-area {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+
 .game-board {
   display: grid;
-  grid-template-columns: repeat(3, 110px);
-  grid-template-rows: repeat(3, 110px);
-  gap: 8px;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 6px;
   margin: 0 auto;
-  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+  }
+  .game-board {
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+  }
 }
 
 .cell {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid #6a5acd;
-  font-size: 2.5em;
-  font-family: 'Orbitron', sans-serif;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid #5e5e8d;
+  font-size: 2.2em;
   cursor: pointer;
   color: transparent;
   transition: all 0.3s ease;
-  border-radius: 10px;
+  border-radius: 8px;
+  touch-action: manipulation; /* Prevent iPhone zoom on double-tap */
 }
 
 .cell:hover {
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 15px rgba(106, 90, 205, 0.7);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 10px rgba(94, 94, 141, 0.5);
 }
 
 .cell.X, .cell.O {
   pointer-events: none;
-  text-shadow: 0 0 10px currentColor;
+  text-shadow: 0 0 8px currentColor;
 }
 
 .chat-box {
   display: none;
-  margin: 20px auto;
-  width: 100%;
-  max-width: 450px;
-  background: rgba(20, 10, 40, 0.9);
-  padding: 15px;
-  border-radius: 10px;
+  width: 200px;
+  background: rgba(30, 30, 47, 0.9);
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ff4d4d;
-  box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
+}
+
+@media (max-width: 600px) {
+  .chat-box {
+    width: 100%;
+    max-width: 300px;
+  }
 }
 
 #chatMessages {
-  max-height: 120px;
+  max-height: 150px;
   overflow-y: auto;
-  color: #e0e0ff;
+  color: #d0d0e0;
   text-align: left;
-  font-family: 'Roboto Mono', monospace;
   padding: 5px;
+  font-size: 0.9em;
 }
 
 #chatInput {
   width: 70%;
-  padding: 8px;
-  background: #2e1a47;
-  color: #e0e0ff;
+  padding: 6px;
+  background: #3b3b5e;
+  color: #ffffff;
   border: 1px solid #ff4d4d;
   border-radius: 5px;
+  font-size: 0.9em;
+}
+
+#sendChat {
+  padding: 6px 12px;
+  font-size: 0.9em;
 }
 
 .controls {
@@ -192,29 +229,32 @@ a:hover {
 }
 
 button {
-  padding: 12px 25px;
+  padding: 10px 20px;
   margin: 5px;
-  font-family: 'Orbitron', sans-serif;
   font-size: 1em;
   cursor: pointer;
   border: none;
   border-radius: 8px;
   background: #4d94ff;
-  color: #e0e0ff;
-  text-shadow: 0 0 5px #e0e0ff;
+  color: #ffffff;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px #4d94ff;
+  box-shadow: 0 0 8px #4d94ff;
+  touch-action: manipulation;
 }
 
 button:hover {
-  background: #6a5acd;
-  box-shadow: 0 0 20px #6a5acd;
+  background: #5e5e8d;
+  box-shadow: 0 0 12px #5e5e8d;
+}
+
+.start-btn {
+  background: #ff4d4d;
+  animation: pulsate 1.5s infinite;
 }
 
 #status {
   margin-top: 20px;
-  font-size: 1.3em;
-  font-family: 'Roboto Mono', monospace;
+  font-size: 1.2em;
   color: #ffcc00;
   text-shadow: 0 0 5px #ffcc00;
 }
@@ -229,7 +269,7 @@ button:hover {
   border: 2px solid #ff4d4d;
   border-radius: 10px;
   padding: 5px;
-  background: rgba(20, 10, 40, 0.7);
+  background: rgba(30, 30, 47, 0.7);
   transition: transform 0.3s ease;
 }
 
@@ -239,7 +279,6 @@ button:hover {
 }
 
 .donate-text {
-  font-family: 'Roboto Mono', monospace;
   font-size: 0.9em;
   color: #ffcc00;
   margin-top: 5px;
@@ -247,29 +286,23 @@ button:hover {
 
 .footer {
   margin-top: 20px;
-  font-family: 'Roboto Mono', monospace;
   font-size: 1em;
-  color: #e0e0ff;
-  background: rgba(20, 10, 40, 0.7);
+  color: #d0d0e0;
+  background: rgba(30, 30, 47, 0.7);
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #6a5acd;
+  border: 1px solid #5e5e8d;
 }
 
 @keyframes pulsate {
-  0% { transform: scale(1); box-shadow: 0 0 10px #ff4d4d; }
-  50% { transform: scale(1.1); box-shadow: 0 0 20px #ff4d4d; }
-  100% { transform: scale(1); box-shadow: 0 0 10px #ff4d4d; }
-}
-
-.pulsate {
-  animation: pulsate 1.5s infinite;
-  background: #ff4d4d;
+  0% { transform: scale(1); box-shadow: 0 0 8px #ff4d4d; }
+  50% { transform: scale(1.1); box-shadow: 0 0 15px #ff4d4d; }
+  100% { transform: scale(1); box-shadow: 0 0 8px #ff4d4d; }
 }
 
 @keyframes float {
   0% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  50% { transform: translateY(-15px); }
   100% { transform: translateY(0); }
 }
 
@@ -284,22 +317,22 @@ button:hover {
 
 .balloon {
   position: absolute;
-  width: 8vw;
-  height: 11vw;
-  background: radial-gradient(circle, #ff4d4d 0%, #6a5acd 100%);
+  width: 50px;
+  height: 70px;
+  background: radial-gradient(circle, #ff4d4d 0%, #5e5e8d 100%);
   border-radius: 50%;
   animation: float 3s infinite;
-  box-shadow: 0 0 15px rgba(106, 90, 205, 0.7);
+  box-shadow: 0 0 10px rgba(94, 94, 141, 0.5);
 }
 
 .balloon::after {
   content: "";
   position: absolute;
-  bottom: -2vw;
+  bottom: -15px;
   left: 50%;
-  width: 0.3vw;
-  height: 3vw;
-  background: #e0e0ff;
+  width: 2px;
+  height: 20px;
+  background: #d0d0e0;
 }
 
 .balloon:nth-child(2) {
@@ -321,7 +354,7 @@ button:hover {
 }
 
 .balloon:nth-child(5) {
-  background: radial-gradient(circle, #cc33ff 0%, #4d94ff 100%);
+  background: radial-gradient(circle, #5e5e8d 0%, #4d94ff 100%);
   left: 80%;
   animation-delay: 1.5s;
 }
