@@ -27,7 +27,7 @@
       <div class="description-page" id="descriptionPage">
         <h1>XOwars</h1>
         <p>
-          Welcome to XOwars, a fun tic-tac-toe game! Play with a friend on the same device, challenge the computer, or connect with a friend online using game codes.
+          Welcome to XOwars, a fun tic-tac-toe game! Play with a friend on the same device, challenge the computer, or connect online with a friend using a game code.
         </p>
         <p>
           <strong>How to Play:</strong>
@@ -35,7 +35,7 @@
             <li>Choose colors for Player X and Player O.</li>
             <li>Click "Start Game" to begin.</li>
             <li>Pick your mode: Local, Computer, or Online.</li>
-            <li>For online play, generate a game code, share it with a friend, and enter their code to connect.</li>
+            <li>For online play, one player creates a game code, and the other joins using that code.</li>
             <li>Take turns to get three symbols in a row and win!</li>
           </ol>
         </p>
@@ -46,33 +46,35 @@
       <!-- Game Page -->
       <div class="game-page" id="gamePage">
         <h1>XOwars</h1>
-        <div class="mode-selector">
-          <h2>Choose Mode:</h2>
+        <div class="mode-section">
+          <h2>Choose Mode</h2>
           <select id="modeSelect">
             <option value="twoPlayer">Play Locally</option>
             <option value="ai">Play Computer</option>
             <option value="online">Play Online</option>
           </select>
-          <h2>Computer Difficulty:</h2>
+          <h2>Computer Difficulty</h2>
           <select id="difficultySelect">
             <option value="beginner">Easy</option>
             <option value="amateur">Medium</option>
             <option value="pro">Hard</option>
           </select>
         </div>
-        <div class="color-picker">
-          <h2>Pick Your Colors:</h2>
-          <label for="colorX">Player X Color:</label>
+        <div class="color-section">
+          <h2>Pick Your Colors</h2>
+          <label for="colorX">Player X:</label>
           <input type="color" id="colorX" value="#ff4d4d" />
-          <label for="colorO">Player O Color:</label>
+          <label for="colorO">Player O:</label>
           <input type="color" id="colorO" value="#4d94ff" />
           <button id="applyColors">Set Colors</button>
         </div>
-        <div class="multiplayer-controls" id="multiplayerControls">
-          <button id="generatePinBtn">Generate Game Code</button>
+        <div class="multiplayer-section" id="multiplayerSection">
+          <h2>Online Play</h2>
+          <button id="generatePinBtn">Create Game Code</button>
           <p id="generatedCode" class="generated-code"></p>
-          <input type="text" id="pinInput" placeholder="Enter Friend's Code" />
+          <input type="text" id="pinInput" placeholder="Enter Game Code" />
           <button id="joinBtn">Join Game</button>
+          <p id="multiplayerStatus" class="multiplayer-status"></p>
         </div>
         <div class="game-area">
           <div class="game-board" id="gameBoard">
@@ -86,11 +88,14 @@
             <div class="cell" data-cell></div>
             <div class="cell" data-cell></div>
           </div>
-          <div class="chat-box" id="chatBox">
-            <h3>Chat</h3>
-            <div id="chatMessages"></div>
-            <input type="text" id="chatInput" placeholder="Type a message..." />
-            <button id="sendChat">Send</button>
+          <div class="chat-sidebar" id="chatSidebar">
+            <button id="toggleChatBtn" class="chat-toggle">Chat</button>
+            <div class="chat-content" id="chatContent">
+              <h3>Chat</h3>
+              <div id="chatMessages"></div>
+              <input type="text" id="chatInput" placeholder="Type a message..." />
+              <button id="sendChat">Send</button>
+            </div>
           </div>
         </div>
         <div class="controls">
@@ -98,7 +103,7 @@
           <button id="quitBtn">Quit</button>
         </div>
         <p id="status">Player X's Turn</p>
-        <div class="donate-container">
+        <div class="donate-section">
           <img src="donate.jpg" alt="Donate QR Code" class="donate-qr" />
           <p class="donate-text">Support the Developer!</p>
         </div>
