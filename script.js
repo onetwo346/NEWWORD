@@ -1,7 +1,7 @@
 const cells = document.querySelectorAll("[data-cell]");
 const statusDisplay = document.getElementById("status");
 const restartBtn = document.getElementById("restartBtn");
-const clearBtn = document.getElementById("clearBtn");
+const clearBtn = document.getElementById("clearBtn"); // New button
 const pauseBtn = document.getElementById("pauseBtn");
 const quitBtn = document.getElementById("quitBtn");
 const colorXInput = document.getElementById("colorX");
@@ -92,16 +92,16 @@ function toggleMultiplayerControls() {
   multiplayerSection.style.display = isOnlineMode ? "block" : "none";
   chatSidebar.style.display = isOnlineMode ? "block" : "none";
   chatContent.classList.remove("active");
-  toggleChatBtn.textContent = "Open Comm";
+  toggleChatBtn.textContent = "Open Comm"; // Reset chat button
   generatedCodeDisplay.textContent = "";
   multiplayerStatus.textContent = "";
   playerSymbol = null;
   if (peer) peer.destroy();
   conn = null;
-  clearGrid();
+  clearGrid(); // Clear board on mode switch
 }
 
-// Generate Game Code (Both Players Can Host)
+// Generate Game Code and Host
 generatePinBtn.addEventListener("click", () => {
   if (peer) peer.destroy();
   peer = new Peer(generatePinCode(), {
@@ -110,15 +110,14 @@ generatePinBtn.addEventListener("click", () => {
   });
   peer.on('open', (id) => {
     generatedCodeDisplay.textContent = `Your Code: ${id}`;
-    multiplayerStatus.textContent = "Share this code or enter another to connect!";
-    playerSymbol = null; // Symbol assigned after connection
+    multiplayerStatus.textContent = "Awaiting Challenger...";
+    playerSymbol = "X";
+    isXNext = true;
+    statusDisplay.textContent = "X Activates... (You: X)";
     gameActive = true;
   });
   peer.on('connection', (connection) => {
     conn = connection;
-    playerSymbol = "X"; // Incoming connection makes this player X
-    isXNext = true;
-    statusDisplay.textContent = "X Activates... (You: X)";
     setupConnection();
     multiplayerStatus.textContent = "Grid Linked! Engage!";
     chatContent.classList.add("active");
@@ -126,8 +125,9 @@ generatePinBtn.addEventListener("click", () => {
     syncBoard();
   });
   peer.on('error', (err) => {
-    multiplayerStatus.textContent = `Error: ${err.type}. Retry generating code.`;
+    multiplayerStatus.textContent = `Error: ${err.type}. Retrying...`;
     console.error("PeerJS Error:", err);
+    attemptReconnect(true);
   });
   clickSound.play();
 });
@@ -141,24 +141,33 @@ function generatePinCode() {
   return pin;
 }
 
-// Join Game (Connect to Any Code)
+// Join Game
 joinBtn.addEventListener("click", () => {
   const opponentCode = pinInput.value.trim().toUpperCase();
   if (!opponentCode) {
     statusDisplay.textContent = "Input a Code!";
     return;
   }
-  if (!peer) {
-    multiplayerStatus.textContent = "Generate your code first!";
-    return;
-  }
-  conn = peer.connect(opponentCode, { reliable: true });
-  playerSymbol = "O"; // Connecting player is O
-  isXNext = true;
-  statusDisplay.textContent = "X Activates... (You: O)";
-  gameActive = true;
-  setupConnection();
-  multiplayerStatus.textContent = "Linking...";
+  if (peer) peer.destroy();
+  peer = new Peer(generatePinCode(), {
+    debug: 2,
+    config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "turn:relay1.expressturn.com:3478", username: "user", credential: "pass" }] }
+  });
+  peer.on('open', (id) => {
+    generatedCodeDisplay.textContent = `Your Code: ${id}`;
+    multiplayerStatus.textContent = "Linking...";
+    conn = peer.connect(opponentCode, { reliable: true });
+    playerSymbol = "O";
+    isXNext = true;
+    statusDisplay.textContent = "X Activates... (You: O)";
+    gameActive = true;
+    setupConnection();
+  });
+  peer.on('error', (err) => {
+    multiplayerStatus.textContent = `Error: ${err.type}. Retrying...`;
+    console.error("PeerJS Error:", err);
+    attemptReconnect(false);
+  });
   clickSound.play();
 });
 
@@ -185,7 +194,7 @@ function setupConnection() {
     } else if (data.type === "sync" || data.type === "clear") {
       board = data.board;
       updateBoard();
-      isXNext = true;
+      isXNext = true; // Reset to X's turn after clear
       statusDisplay.textContent = "X Activates...";
     } else if (data.type === "gameOver") {
       showWin(data.message);
@@ -196,19 +205,34 @@ function setupConnection() {
   conn.on('close', () => {
     statusDisplay.textContent = "Challenger Lost. Reset to Retry.";
     gameActive = false;
-    multiplayerStatus.textContent = "Disconnected. Generate or join again.";
+    multiplayerStatus.textContent = "Disconnected. Reconnecting...";
     chatContent.classList.remove("active");
     toggleChatBtn.textContent = "Open Comm";
+    attemptReconnect(playerSymbol === "X");
   });
   conn.on('error', (err) => {
     console.error("Connection Error:", err);
-    multiplayerStatus.textContent = "Link Issue. Try again.";
+    multiplayerStatus.textContent = "Link Issue. Reconnecting...";
+    attemptReconnect(playerSymbol === "X");
   });
+}
+
+// Attempt Reconnect
+function attemptReconnect(isHost) {
+  if (!peer || peer.destroyed) return;
+  setTimeout(() => {
+    if (isHost) {
+      multiplayerStatus.textContent = "Awaiting Challenger...";
+    } else {
+      conn = peer.connect(pinInput.value.trim().toUpperCase(), { reliable: true });
+      setupConnection();
+    }
+  }, 2000);
 }
 
 // Draw Symbol
 function drawSymbol(event) {
-  if (!gameActive || isPaused || !playerSymbol) return; // Ensure symbol is assigned
+  if (!gameActive || isPaused) return;
   const cell = event.target;
   const index = [...cells].indexOf(cell);
   if (board[index]) return;
@@ -245,7 +269,7 @@ function drawSymbol(event) {
     if (board.every(cell => cell)) {
       showWin("Gridlock!");
       gameActive = false;
-      setTimeout(clearGrid, 2000);
+      setTimeout(clearGrid, 2000); // Clear instead of restart
       return;
     }
 
@@ -372,7 +396,7 @@ function showWin(message) {
   setTimeout(() => overlay.remove(), 2000);
 }
 
-// Clear Grid
+// Clear Grid (New Feature)
 function clearGrid() {
   isXNext = true;
   gameActive = true;
@@ -389,7 +413,7 @@ function clearGrid() {
 
 clearBtn.addEventListener("click", clearGrid);
 
-// Restart Game
+// Restart Game (Full Reset)
 function restartGame() {
   isXNext = true;
   gameActive = true;
@@ -406,7 +430,7 @@ function restartGame() {
     multiplayerStatus.textContent = "Resetting...";
     generatedCodeDisplay.textContent = `Your Code: ${peer.id}`;
     pinInput.value = "";
-    multiplayerStatus.textContent = "Share this code or enter another to connect!";
+    multiplayerStatus.textContent = playerSymbol === "X" ? "Awaiting Challenger..." : "Reconnect Required";
     if (conn && conn.open) conn.send({ type: "sync", board });
   } else {
     multiplayerStatus.textContent = "";
@@ -447,8 +471,8 @@ pauseBtn.addEventListener("click", () => {
 // Quit Game
 quitBtn.addEventListener("click", () => {
   if (confirm("Exit the Grid?")) {
-    if (peer) peer.destroy();
-    window.close();
+    if (peer) peer.destroy(); // Clean up PeerJS
+    window.close(); // Attempt to close window
   }
 });
 
