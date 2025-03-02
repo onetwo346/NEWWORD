@@ -223,6 +223,17 @@ body {
   font-size: clamp(1em, 3vw, 1.2em);
   text-shadow: 0 0 5px #00ffff;
   margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
 }
 
 .game-core {
@@ -403,7 +414,4 @@ body {
   .radial-option:nth-child(1) { transform: translate(-80px, -25px); }
   .radial-option:nth-child(2) { transform: translate(0, -40px); }
   .radial-option:nth-child(3) { transform: translate(80px, -25px); }
-  .cell {
-    font-size: clamp(1.5em, 4vw, 2em);
-  }
 }
