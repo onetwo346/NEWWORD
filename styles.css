@@ -111,7 +111,6 @@ body {
 .radial-menu {
   position: relative;
   margin-bottom: 15px;
-  text-align: center; /* Center the mode toggle button */
 }
 
 .mode-toggle {
@@ -131,7 +130,6 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10; /* Ensure radial options appear above other elements */
 }
 
 .radial-options.active, .difficulty-options.active {
@@ -189,7 +187,6 @@ body {
   width: 35px;
   height: 35px;
   cursor: pointer;
-  -webkit-appearance: none; /* Remove default iOS styling */
 }
 
 .multiplayer-panel {
@@ -226,7 +223,6 @@ body {
   font-size: clamp(1em, 3vw, 1.2em);
   text-shadow: 0 0 5px #00ffff;
   margin: 8px 0;
-  text-align: center; /* Ensure status text is centered */
 }
 
 .game-core {
@@ -262,7 +258,7 @@ body {
   touch-action: manipulation;
 }
 
-.cell:hover:not(.X):not(.O), .cell:active:not(.X):not(.O) {
+.cell:hover, .cell:active {
   background: rgba(255, 0, 255, 0.2);
   box-shadow: 0 0 15px #ff00ff;
 }
@@ -312,10 +308,6 @@ body {
   font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
-.chat-log div {
-  word-break: break-word; /* Ensure long chat messages wrap */
-}
-
 .control-panel {
   margin-top: 15px;
   display: flex;
@@ -357,7 +349,6 @@ body {
   background: rgba(20, 20, 40, 0.7);
   padding: 8px;
   border-radius: 10px;
-  text-align: center;
 }
 
 .win-overlay {
@@ -370,7 +361,7 @@ body {
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Increased z-index to ensure it’s above everything */
+  z-index: 100;
   animation: fadeIn 0.5s;
 }
 
@@ -384,6 +375,43 @@ body {
   text-shadow: 0 0 20px #ff00ff;
   animation: pulseText 1s infinite;
   text-align: center;
+}
+
+.instructions-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  animation: fadeIn 0.5s;
+}
+
+.instructions-modal.active {
+  display: flex;
+}
+
+.instructions-content {
+  background: rgba(20, 20, 40, 0.9);
+  border: 2px solid #ff00ff;
+  border-radius: 15px;
+  padding: 20px;
+  max-width: clamp(300px, 80vw, 400px);
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.instructions-content p {
+  color: #00ffff;
+  font-size: clamp(0.9em, 3vw, 1.1em);
+  margin: 10px 0;
+  text-shadow: 0 0 5px #00ffff;
+  line-height: 1.4;
 }
 
 @keyframes fadeIn {
@@ -412,4 +440,10 @@ body {
   .radial-option:nth-child(1) { transform: translate(-80px, -25px); }
   .radial-option:nth-child(2) { transform: translate(0, -40px); }
   .radial-option:nth-child(3) { transform: translate(80px, -25px); }
+  .multiplayer-panel {
+    padding: 8px;
+  }
+  .neon-btn {
+    padding: clamp(6px, 1.5vw, 10px) clamp(12px, 2.5vw, 20px);
+  }
 }
