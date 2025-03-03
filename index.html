@@ -51,25 +51,10 @@
           <button id="applyColors" class="neon-btn small">Sync Colors</button>
         </div>
         <div class="multiplayer-panel" id="multiplayerSection">
+          <button id="generatePinBtn" class="neon-btn">Generate Code</button>
           <p id="generatedCode" class="code-display"></p>
-          <div class="lobby-section">
-            <h3>Online Lobby</h3>
-            <div id="lobbyList"></div>
-          </div>
-          <div class="contacts-section">
-            <h3>Your Contacts</h3>
-            <div id="contactsList"></div>
-            <input type="text" id="addFriendInput" placeholder="Enter Friend's Code" class="neon-input" />
-            <button id="addFriendBtn" class="neon-btn small">Add Friend</button>
-            <div id="friendRequests">
-              <h3>Friend Requests</h3>
-              <div id="friendRequestsList"></div>
-            </div>
-          </div>
-          <div class="match-history">
-            <h3>Match History</h3>
-            <div id="matchHistoryList"></div>
-          </div>
+          <input type="text" id="pinInput" placeholder="Enter Friend's Code" class="neon-input" />
+          <button id="joinBtn" class="neon-btn">Join Grid</button>
           <p id="multiplayerStatus" class="status-text"></p>
         </div>
         <div class="game-core">
@@ -94,7 +79,7 @@
           </div>
         </div>
         <div class="control-panel">
-          <button id="clearBtn" class="neon-btn">Clear Grid</button>
+          <button id="clearBtn" class="neon-btn">Clear Grid</button> <!-- New Button -->
           <button id="restartBtn" class="neon-btn">Reset Grid</button>
           <button id="pauseBtn" class="neon-btn">Pause</button>
           <button id="quitBtn" class="neon-btn">Exit System</button>
@@ -109,8 +94,6 @@
     </div>
     <audio id="clickSound" src="click.mp3"></audio>
     <audio id="winSound" src="win.mp3"></audio>
-    <audio id="joinSound" src="join.mp3"></audio>
-    <audio id="messageSound" src="message.mp3"></audio>
     <script src="script.js"></script>
   </body>
 </html>
