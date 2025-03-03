@@ -26,12 +26,13 @@ const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendChatBtn = document.getElementById("sendChat");
 const instructionsModal = document.getElementById("instructionsModal");
+const instructionsBtn = document.getElementById("instructionsBtn");
 const closeInstructions = document.getElementById("closeInstructions");
 const clickSound = document.getElementById("clickSound");
 const winSound = document.getElementById("winSound");
 
 let isXNext = true;
-let gameActive = true; // Reverted to true like original
+let gameActive = true;
 let isPaused = false;
 let colorX = colorXInput.value;
 let colorO = colorOInput.value;
@@ -44,7 +45,8 @@ let conn = null;
 let board = Array(9).fill(null);
 let moveQueue = [];
 let lastSyncTime = 0;
-let gameCode = null; // For reconnect
+let gameCode = null;
+let hasMoved = false; // Flag to prevent AI double-tap
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -52,22 +54,26 @@ const winningCombinations = [
   [0, 4, 8], [2, 4, 6]
 ];
 
-// Show Instructions on First Load
-if (!localStorage.getItem("seenInstructions")) {
-  instructionsModal.classList.add("active");
-  localStorage.setItem("seenInstructions", "true");
-}
-
-closeInstructions.addEventListener("click", () => {
-  instructionsModal.classList.remove("active");
-  clickSound.play();
-});
-
-// Start Game Entry
+// Start Game Entry with Instructions
 startBtn.addEventListener("click", () => {
   descriptionPage.style.display = "none";
   gamePage.style.display = "block";
   toggleMultiplayerControls();
+  if (!localStorage.getItem("seenInstructions")) {
+    instructionsModal.classList.add("active");
+    localStorage.setItem("seenInstructions", "true");
+  }
+  clickSound.play();
+});
+
+// Instructions Button
+instructionsBtn.addEventListener("click", () => {
+  instructionsModal.classList.add("active");
+  clickSound.play();
+});
+
+closeInstructions.addEventListener("click", () => {
+  instructionsModal.classList.remove("active");
   clickSound.play();
 });
 
@@ -87,8 +93,11 @@ modeOptions.querySelectorAll(".radial-option").forEach(option => {
     if (isAIMode) difficultyOptions.classList.add("active");
     else difficultyOptions.classList.remove("active");
     modeOptions.classList.remove("active");
-    clearGrid(); // Auto-clear on mode switch
-    if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
+    clearGrid();
+    if (isAIMode && Math.random() > 0.5 && !hasMoved) {
+      hasMoved = true;
+      setTimeout(makeAIMove, 500);
+    }
     clickSound.play();
   });
 });
@@ -97,8 +106,11 @@ difficultyOptions.querySelectorAll(".radial-option").forEach(option => {
   option.addEventListener("click", (e) => {
     aiDifficulty = e.target.dataset.difficulty;
     difficultyOptions.classList.remove("active");
-    clearGrid(); // Auto-clear on difficulty change
-    if (Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
+    clearGrid();
+    if (Math.random() > 0.5 && !hasMoved) {
+      hasMoved = true;
+      setTimeout(makeAIMove, 500);
+    }
     clickSound.play();
   });
 });
@@ -128,8 +140,8 @@ generatePinBtn.addEventListener("click", () => {
   peer.on('open', (id) => {
     generatedCodeDisplay.textContent = `Your Code: ${id}`;
     multiplayerStatus.textContent = "Share this code or enter another to connect!";
-    playerSymbol = "X"; // Host can play X or O freely
-    localStorage.setItem("gameCode", id); // For reconnect
+    playerSymbol = "X";
+    localStorage.setItem("gameCode", id);
   });
   peer.on('connection', (connection) => {
     conn = connection;
@@ -167,10 +179,10 @@ joinBtn.addEventListener("click", () => {
     return;
   }
   conn = peer.connect(opponentCode, { reliable: true });
-  playerSymbol = "O"; // Joiner can play X or O freely
+  playerSymbol = "O";
   setupConnection();
   multiplayerStatus.textContent = "Linking...";
-  localStorage.setItem("opponentCode", opponentCode); // For reconnect
+  localStorage.setItem("opponentCode", opponentCode);
   clickSound.play();
 });
 
@@ -203,7 +215,7 @@ function setupConnection() {
       showWin(data.message);
       gameActive = false;
       winSound.play();
-      setTimeout(clearGrid, 2000); // Multiplayer auto-clear
+      setTimeout(clearGrid, 2000);
     }
   });
   conn.on('close', () => {
@@ -249,7 +261,6 @@ function drawSymbol(event) {
   if (board[index]) return;
 
   if (isOnlineMode) {
-    // No strict turn enforcement at start—anyone can go first
     const currentSymbol = isXNext ? "X" : "O";
     board[index] = currentSymbol;
     updateBoard();
@@ -266,6 +277,7 @@ function drawSymbol(event) {
     checkGameEnd();
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
+    hasMoved = true; // Mark player move
   } else {
     const currentSymbol = isXNext ? "X" : "O";
     board[index] = currentSymbol;
@@ -276,18 +288,19 @@ function drawSymbol(event) {
       showWin(`${currentSymbol} Dominates!`);
       gameActive = false;
       winSound.play();
-      setTimeout(clearGrid, 2000); // Auto-clear
+      setTimeout(clearGrid, 2000);
       return;
     }
     if (board.every(cell => cell)) {
       showWin("Gridlock!");
       gameActive = false;
-      setTimeout(clearGrid, 2000); // Auto-clear
+      setTimeout(clearGrid, 2000);
       return;
     }
 
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
+    hasMoved = true; // Mark player move
     if (isAIMode && !isXNext) setTimeout(makeAIMove, 500);
   }
 }
@@ -303,7 +316,7 @@ function processMoveQueue() {
 
 // AI Move
 function makeAIMove() {
-  if (!gameActive || isPaused) return;
+  if (!gameActive || isPaused || hasMoved) return; // Prevent double-tap
   const emptyCells = [...cells].filter((_, i) => !board[i]);
   if (emptyCells.length > 0) {
     let chosenCell;
@@ -315,6 +328,7 @@ function makeAIMove() {
       chosenCell = getBestMove(emptyCells, "O", true);
     }
     chosenCell.click();
+    hasMoved = true; // Mark AI move
   }
 }
 
@@ -383,18 +397,18 @@ function checkWin(symbol) {
 
 // Check Game End
 function checkGameEnd() {
-  const currentSymbol = isXNext ? "O" : "X"; // Last mover
+  const currentSymbol = isXNext ? "O" : "X";
   if (checkWin(currentSymbol)) {
     if (isOnlineMode && conn && conn.open) conn.send({ type: "gameOver", message: `${currentSymbol} Dominates!` });
     showWin(`${currentSymbol} Dominates!`);
     gameActive = false;
     winSound.play();
-    setTimeout(clearGrid, 2000); // Auto-clear
+    setTimeout(clearGrid, 2000);
   } else if (board.every(cell => cell)) {
     if (isOnlineMode && conn && conn.open) conn.send({ type: "gameOver", message: "Gridlock!" });
     showWin("Gridlock!");
     gameActive = false;
-    setTimeout(clearGrid, 2000); // Auto-clear
+    setTimeout(clearGrid, 2000);
   }
 }
 
@@ -420,9 +434,11 @@ function clearGrid() {
   statusDisplay.textContent = "X Activates...";
   board = Array(9).fill(null);
   updateBoard();
+  hasMoved = false; // Reset move flag
   if (isOnlineMode && conn && conn.open) {
     conn.send({ type: "clear", board });
   }
+  if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can start
   clickSound.play();
 }
 
@@ -430,7 +446,7 @@ clearBtn.addEventListener("click", clearGrid);
 
 // Restart Game
 function restartGame() {
-  clearGrid(); // Auto-clear on restart
+  clearGrid();
   moveQueue = [];
   if (isOnlineMode && peer) {
     chatMessages.innerHTML = "";
@@ -442,7 +458,6 @@ function restartGame() {
     multiplayerStatus.textContent = "Share this code or enter another to connect!";
     if (conn && conn.open) conn.send({ type: "sync", board });
   }
-  if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
   clickSound.play();
 }
 
