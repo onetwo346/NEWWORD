@@ -47,6 +47,7 @@ let moveQueue = [];
 let lastSyncTime = 0;
 let gameCode = null;
 let aiTimer = null;
+let moveInProgress = false; // Lock to prevent double moves
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -253,12 +254,16 @@ function attemptReconnect() {
 
 // Draw Symbol (Player Move)
 function drawSymbol(event) {
-  if (!gameActive || isPaused) return;
+  if (!gameActive || isPaused || moveInProgress) return;
+  moveInProgress = true; // Lock move
   const cell = event.target;
   const index = [...cells].indexOf(cell);
-  if (board[index]) return;
+  if (board[index]) {
+    moveInProgress = false;
+    return;
+  }
 
-  clearAITimer(); // Stop timer once player moves
+  clearAITimer();
 
   if (isOnlineMode) {
     const currentSymbol = isXNext ? "X" : "O";
@@ -277,6 +282,7 @@ function drawSymbol(event) {
     checkGameEnd();
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
+    moveInProgress = false;
   } else {
     const currentSymbol = isXNext ? "X" : "O";
     board[index] = currentSymbol;
@@ -288,18 +294,27 @@ function drawSymbol(event) {
       gameActive = false;
       winSound.play();
       setTimeout(clearGrid, 2000);
+      moveInProgress = false;
       return;
     }
     if (board.every(cell => cell)) {
       showWin("Gridlock!");
       gameActive = false;
       setTimeout(clearGrid, 2000);
+      moveInProgress = false;
       return;
     }
 
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
-    if (isAIMode && !isXNext) setTimeout(makeAIMove, 500); // AI follows player
+    if (isAIMode && !isXNext) {
+      setTimeout(() => {
+        makeAIMove();
+        moveInProgress = false; // Unlock after AI move
+      }, 500);
+    } else {
+      moveInProgress = false;
+    }
   }
 }
 
@@ -312,9 +327,10 @@ function processMoveQueue() {
   }
 }
 
-// AI Move (Direct Logic, No Click)
+// AI Move
 function makeAIMove() {
-  if (!gameActive || isPaused || isXNext) return; // Only move when it's AI's turn
+  if (!gameActive || isPaused || moveInProgress || isXNext) return;
+  moveInProgress = true; // Lock move
   const emptyCells = [...cells].filter((_, i) => !board[i]);
   if (emptyCells.length > 0) {
     let chosenIndex;
@@ -326,7 +342,7 @@ function makeAIMove() {
       chosenIndex = [...cells].indexOf(getBestMove(emptyCells, "O", true));
     }
 
-    board[chosenIndex] = "O"; // Direct board update
+    board[chosenIndex] = "O";
     updateBoard();
     clickSound.play();
 
@@ -335,29 +351,32 @@ function makeAIMove() {
       gameActive = false;
       winSound.play();
       setTimeout(clearGrid, 2000);
+      moveInProgress = false;
       return;
     }
     if (board.every(cell => cell)) {
       showWin("Gridlock!");
       gameActive = false;
       setTimeout(clearGrid, 2000);
+      moveInProgress = false;
       return;
     }
 
-    isXNext = true; // Hand turn back to player
+    isXNext = true;
     statusDisplay.textContent = "X Activates...";
+    moveInProgress = false; // Unlock after AI move
   }
 }
 
 // AI Start Timer
 function startAITimer() {
   clearAITimer();
-  if (isAIMode && gameActive && !isPaused) {
+  if (isAIMode && gameActive && !isPaused && !moveInProgress) {
     aiTimer = setTimeout(() => {
-      if (!board.some(cell => cell) && !isXNext) { // Only if no moves and AI's turn
+      if (!board.some(cell => cell) && !isXNext) { // AI starts only if no moves
         makeAIMove();
       }
-    }, 3000); // 3 seconds
+    }, 3000);
   }
 }
 
@@ -466,6 +485,7 @@ function clearGrid() {
   isXNext = true;
   gameActive = true;
   isPaused = false;
+  moveInProgress = false;
   pauseBtn.textContent = "Pause";
   statusDisplay.textContent = "X Activates...";
   board = Array(9).fill(null);
