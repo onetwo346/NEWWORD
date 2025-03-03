@@ -47,7 +47,6 @@ let moveQueue = [];
 let lastSyncTime = 0;
 let gameCode = null;
 let aiTimer = null;
-let aiHasStarted = false; // New flag to track AI's initial move
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -252,7 +251,7 @@ function attemptReconnect() {
   }
 }
 
-// Draw Symbol
+// Draw Symbol (Player Move)
 function drawSymbol(event) {
   if (!gameActive || isPaused) return;
   const cell = event.target;
@@ -300,7 +299,7 @@ function drawSymbol(event) {
 
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
-    if (isAIMode && !isXNext) setTimeout(makeAIMove, 500); // AI moves after player
+    if (isAIMode && !isXNext) setTimeout(makeAIMove, 500); // AI follows player
   }
 }
 
@@ -313,30 +312,49 @@ function processMoveQueue() {
   }
 }
 
-// AI Move
+// AI Move (Direct Logic, No Click)
 function makeAIMove() {
-  if (!gameActive || isPaused) return;
+  if (!gameActive || isPaused || isXNext) return; // Only move when it's AI's turn
   const emptyCells = [...cells].filter((_, i) => !board[i]);
   if (emptyCells.length > 0) {
-    let chosenCell;
+    let chosenIndex;
     if (aiDifficulty === "beginner") {
-      chosenCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      chosenIndex = [...cells].indexOf(emptyCells[Math.floor(Math.random() * emptyCells.length)]);
     } else if (aiDifficulty === "amateur") {
-      chosenCell = getBestMove(emptyCells, "O");
+      chosenIndex = [...cells].indexOf(getBestMove(emptyCells, "O"));
     } else if (aiDifficulty === "pro") {
-      chosenCell = getBestMove(emptyCells, "O", true);
+      chosenIndex = [...cells].indexOf(getBestMove(emptyCells, "O", true));
     }
-    chosenCell.click(); // AI makes a move
-    aiHasStarted = true; // Mark AI has started
+
+    board[chosenIndex] = "O"; // Direct board update
+    updateBoard();
+    clickSound.play();
+
+    if (checkWin("O")) {
+      showWin("O Dominates!");
+      gameActive = false;
+      winSound.play();
+      setTimeout(clearGrid, 2000);
+      return;
+    }
+    if (board.every(cell => cell)) {
+      showWin("Gridlock!");
+      gameActive = false;
+      setTimeout(clearGrid, 2000);
+      return;
+    }
+
+    isXNext = true; // Hand turn back to player
+    statusDisplay.textContent = "X Activates...";
   }
 }
 
 // AI Start Timer
 function startAITimer() {
   clearAITimer();
-  if (isAIMode && gameActive && !isPaused && !aiHasStarted) {
+  if (isAIMode && gameActive && !isPaused) {
     aiTimer = setTimeout(() => {
-      if (!board.some(cell => cell)) { // Only if no moves yet
+      if (!board.some(cell => cell) && !isXNext) { // Only if no moves and AI's turn
         makeAIMove();
       }
     }, 3000); // 3 seconds
@@ -452,7 +470,6 @@ function clearGrid() {
   statusDisplay.textContent = "X Activates...";
   board = Array(9).fill(null);
   updateBoard();
-  aiHasStarted = false; // Reset AI start flag
   if (isOnlineMode && conn && conn.open) {
     conn.send({ type: "clear", board });
   }
