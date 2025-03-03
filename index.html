@@ -79,6 +79,7 @@
           </div>
         </div>
         <div class="control-panel">
+          <button id="instructionsBtn" class="neon-btn">Instructions</button> <!-- New Button -->
           <button id="clearBtn" class="neon-btn">Clear Grid</button>
           <button id="restartBtn" class="neon-btn">Reset Grid</button>
           <button id="pauseBtn" class="neon-btn">Pause</button>
@@ -94,15 +95,19 @@
         <p class="signature">Crafted by Nana Kofi Fosu</p>
       </div>
 
-      <!-- Instructions Modal -->
+      <!-- Instructions Modal (Moved to JS control) -->
       <div class="instructions-modal" id="instructionsModal">
         <div class="instructions-content">
-          <h2 class="neon-title">How to Play XOwars</h2>
-          <p>1. Pick a mode: Local Duel, AI Clash, or Online War.</p>
-          <p>2. Tap a cell to place your X or O.</p>
-          <p>3. Align 3 symbols in a row to win!</p>
-          <p>4. Online? Share or join with a code.</p>
-          <button id="closeInstructions" class="neon-btn">Got It!</button>
+          <h2 class="neon-title">XOwars: Grid Mastery</h2>
+          <p>Welcome to the neon battlefield! Here’s how to dominate:</p>
+          <ul>
+            <li><strong>Modes:</strong> Local Duel (2 players), AI Clash (vs CPU), Online War (code-based).</li>
+            <li><strong>Play:</strong> Tap a cell to place X or O—anyone can start!</li>
+            <li><strong>Win:</strong> Align 3 symbols (row, column, diagonal).</li>
+            <li><strong>Online:</strong> Generate or join with a code, chat live.</li>
+            <li><strong>Controls:</strong> Clear, reset, pause, or exit anytime.</li>
+          </ul>
+          <button id="closeInstructions" class="neon-btn">Close</button>
         </div>
       </div>
     </div>
