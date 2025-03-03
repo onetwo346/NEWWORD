@@ -401,7 +401,7 @@ body {
   border-radius: 15px;
   padding: 20px;
   max-width: clamp(300px, 80vw, 400px);
-  text-align: center;
+  text-align: left;
   box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
   backdrop-filter: blur(5px);
 }
@@ -411,7 +411,23 @@ body {
   font-size: clamp(0.9em, 3vw, 1.1em);
   margin: 10px 0;
   text-shadow: 0 0 5px #00ffff;
-  line-height: 1.4;
+}
+
+.instructions-content ul {
+  color: #00ffff;
+  font-size: clamp(0.8em, 2.5vw, 1em);
+  text-shadow: 0 0 5px #00ffff;
+  list-style: none;
+  padding-left: 0;
+}
+
+.instructions-content li {
+  margin: 8px 0;
+}
+
+.instructions-content strong {
+  color: #ff00ff;
+  text-shadow: 0 0 5px #ff00ff;
 }
 
 @keyframes fadeIn {
