@@ -18,7 +18,6 @@ const generatePinBtn = document.getElementById("generatePinBtn");
 const generatedCodeDisplay = document.getElementById("generatedCode");
 const pinInput = document.getElementById("pinInput");
 const joinBtn = document.getElementById("joinBtn");
-const startGameBtn = document.getElementById("startGameBtn"); // New button
 const multiplayerStatus = document.getElementById("multiplayerStatus");
 const chatSidebar = document.getElementById("chatSidebar");
 const toggleChatBtn = document.getElementById("toggleChatBtn");
@@ -32,7 +31,7 @@ const clickSound = document.getElementById("clickSound");
 const winSound = document.getElementById("winSound");
 
 let isXNext = true;
-let gameActive = false; // Start as false, activated by startGame
+let gameActive = true; // Reverted to true like original
 let isPaused = false;
 let colorX = colorXInput.value;
 let colorO = colorOInput.value;
@@ -45,7 +44,7 @@ let conn = null;
 let board = Array(9).fill(null);
 let moveQueue = [];
 let lastSyncTime = 0;
-let gameCode = null; // For reconnect feature
+let gameCode = null; // For reconnect
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -89,7 +88,7 @@ modeOptions.querySelectorAll(".radial-option").forEach(option => {
     else difficultyOptions.classList.remove("active");
     modeOptions.classList.remove("active");
     clearGrid(); // Auto-clear on mode switch
-    gameActive = false; // Wait for explicit start
+    if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
     clickSound.play();
   });
 });
@@ -99,7 +98,7 @@ difficultyOptions.querySelectorAll(".radial-option").forEach(option => {
     aiDifficulty = e.target.dataset.difficulty;
     difficultyOptions.classList.remove("active");
     clearGrid(); // Auto-clear on difficulty change
-    gameActive = false; // Wait for explicit start
+    if (Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
     clickSound.play();
   });
 });
@@ -129,15 +128,14 @@ generatePinBtn.addEventListener("click", () => {
   peer.on('open', (id) => {
     generatedCodeDisplay.textContent = `Your Code: ${id}`;
     multiplayerStatus.textContent = "Share this code or enter another to connect!";
-    playerSymbol = null;
-    gameActive = false; // Wait for start
-    localStorage.setItem("gameCode", id); // Store for reconnect
+    playerSymbol = "X"; // Host can play X or O freely
+    localStorage.setItem("gameCode", id); // For reconnect
   });
   peer.on('connection', (connection) => {
     conn = connection;
     playerSymbol = "X";
     setupConnection();
-    multiplayerStatus.textContent = "Grid Linked! Waiting to Start...";
+    multiplayerStatus.textContent = "Grid Linked! Engage!";
     chatContent.classList.add("active");
     toggleChatBtn.textContent = "Close Comm";
   });
@@ -169,44 +167,24 @@ joinBtn.addEventListener("click", () => {
     return;
   }
   conn = peer.connect(opponentCode, { reliable: true });
-  playerSymbol = "O";
-  gameActive = false; // Wait for start
+  playerSymbol = "O"; // Joiner can play X or O freely
   setupConnection();
   multiplayerStatus.textContent = "Linking...";
-  localStorage.setItem("opponentCode", opponentCode); // Store for reconnect
+  localStorage.setItem("opponentCode", opponentCode); // For reconnect
   clickSound.play();
 });
 
-// Start Game (Any User)
-startGameBtn.addEventListener("click", () => {
-  startGame();
-  if (isOnlineMode && conn && conn.open) {
-    conn.send({ type: "start", board });
-    multiplayerStatus.textContent = "Grid Linked! Engage!";
-  }
-  clickSound.play();
-});
-
-function startGame() {
-  clearGrid(); // Auto-clear on start
-  gameActive = true;
-  statusDisplay.textContent = "X Activates...";
-  if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can start
-}
-
-// Setup PeerJS Connection with Reconnect
+// Setup PeerJS Connection
 function setupConnection() {
   conn.on('open', () => {
-    multiplayerStatus.textContent = "Grid Linked! Waiting to Start...";
+    multiplayerStatus.textContent = "Grid Linked! Engage!";
     chatContent.classList.add("active");
     toggleChatBtn.textContent = "Close Comm";
     syncBoard();
     processMoveQueue();
   });
   conn.on('data', (data) => {
-    if (data.type === "start") {
-      startGame();
-    } else if (!gameActive) return;
+    if (!gameActive) return;
     if (data.type === "move") {
       board = data.board;
       updateBoard();
@@ -225,7 +203,7 @@ function setupConnection() {
       showWin(data.message);
       gameActive = false;
       winSound.play();
-      if (isOnlineMode) setTimeout(clearGrid, 2000); // Multiplayer auto-clear
+      setTimeout(clearGrid, 2000); // Multiplayer auto-clear
     }
   });
   conn.on('close', () => {
@@ -256,7 +234,7 @@ function attemptReconnect() {
             playerSymbol = "O";
             setupConnection();
           }
-          multiplayerStatus.textContent = "Reconnected! Waiting to Start...";
+          multiplayerStatus.textContent = "Reconnected! Engage!";
         });
       }
     }, 2000);
@@ -271,8 +249,9 @@ function drawSymbol(event) {
   if (board[index]) return;
 
   if (isOnlineMode) {
-    if (!playerSymbol || playerSymbol !== (isXNext ? "X" : "O")) return;
-    board[index] = playerSymbol;
+    // No strict turn enforcement at start—anyone can go first
+    const currentSymbol = isXNext ? "X" : "O";
+    board[index] = currentSymbol;
     updateBoard();
     clickSound.play();
 
@@ -297,13 +276,13 @@ function drawSymbol(event) {
       showWin(`${currentSymbol} Dominates!`);
       gameActive = false;
       winSound.play();
-      setTimeout(clearGrid, 2000); // Auto-clear for local/AI
+      setTimeout(clearGrid, 2000); // Auto-clear
       return;
     }
     if (board.every(cell => cell)) {
       showWin("Gridlock!");
       gameActive = false;
-      setTimeout(clearGrid, 2000); // Auto-clear for local/AI
+      setTimeout(clearGrid, 2000); // Auto-clear
       return;
     }
 
@@ -404,18 +383,18 @@ function checkWin(symbol) {
 
 // Check Game End
 function checkGameEnd() {
-  const currentSymbol = isOnlineMode ? playerSymbol : (isXNext ? "O" : "X");
+  const currentSymbol = isXNext ? "O" : "X"; // Last mover
   if (checkWin(currentSymbol)) {
     if (isOnlineMode && conn && conn.open) conn.send({ type: "gameOver", message: `${currentSymbol} Dominates!` });
     showWin(`${currentSymbol} Dominates!`);
     gameActive = false;
     winSound.play();
-    setTimeout(clearGrid, 2000); // Auto-clear for all modes
+    setTimeout(clearGrid, 2000); // Auto-clear
   } else if (board.every(cell => cell)) {
     if (isOnlineMode && conn && conn.open) conn.send({ type: "gameOver", message: "Gridlock!" });
     showWin("Gridlock!");
     gameActive = false;
-    setTimeout(clearGrid, 2000); // Auto-clear for all modes
+    setTimeout(clearGrid, 2000); // Auto-clear
   }
 }
 
@@ -435,7 +414,7 @@ function showWin(message) {
 // Clear Grid
 function clearGrid() {
   isXNext = true;
-  gameActive = true; // Re-enable game after clear
+  gameActive = true;
   isPaused = false;
   pauseBtn.textContent = "Pause";
   statusDisplay.textContent = "X Activates...";
@@ -463,7 +442,7 @@ function restartGame() {
     multiplayerStatus.textContent = "Share this code or enter another to connect!";
     if (conn && conn.open) conn.send({ type: "sync", board });
   }
-  gameActive = false; // Wait for explicit start
+  if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can go first
   clickSound.play();
 }
 
