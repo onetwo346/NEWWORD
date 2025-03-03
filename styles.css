@@ -321,17 +321,25 @@ body {
   text-align: center;
 }
 
-.support-qr {
-  width: clamp(80px, 20vw, 100px);
-  border: 2px solid #ff00ff;
-  border-radius: 15px;
-  padding: 5px;
-  background: rgba(20, 20, 40, 0.7);
-  transition: transform 0.3s;
+.qr-link {
+  display: inline-block;
+  text-decoration: none;
+  background: none; /* No background interference */
+  padding: 0; /* No extra padding around link */
 }
 
-.support-qr:hover, .support-qr:active {
-  transform: scale(1.15);
+.support-qr {
+  width: clamp(100px, 25vw, 150px); /* Larger for scannability */
+  height: auto;
+  border: 2px solid #ff00ff;
+  border-radius: 10px;
+  background: #fff; /* White background for QR contrast */
+  padding: 8px; /* Padding inside border for QR clarity */
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.qr-link:hover .support-qr, .qr-link:active .support-qr {
+  transform: scale(1.1);
   box-shadow: 0 0 20px #ff00ff;
 }
 
@@ -339,6 +347,7 @@ body {
   color: #00ffff;
   font-size: clamp(0.9em, 2.5vw, 1em);
   text-shadow: 0 0 5px #00ffff;
+  margin-top: 5px;
 }
 
 .signature {
@@ -461,5 +470,8 @@ body {
   }
   .neon-btn {
     padding: clamp(6px, 1.5vw, 10px) clamp(12px, 2.5vw, 20px);
+  }
+  .support-qr {
+    width: clamp(80px, 20vw, 120px); /* Smaller for mobile */
   }
 }
