@@ -46,7 +46,7 @@ let board = Array(9).fill(null);
 let moveQueue = [];
 let lastSyncTime = 0;
 let gameCode = null;
-let hasMoved = false; // Flag to prevent AI double-tap
+let aiTimer = null; // For 3-second delay
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -90,14 +90,15 @@ modeOptions.querySelectorAll(".radial-option").forEach(option => {
     isAIMode = mode === "ai";
     isOnlineMode = mode === "online";
     toggleMultiplayerControls();
-    if (isAIMode) difficultyOptions.classList.add("active");
-    else difficultyOptions.classList.remove("active");
+    if (isAIMode) {
+      difficultyOptions.classList.add("active");
+      startAITimer(); // Start timer for AI mode
+    } else {
+      difficultyOptions.classList.remove("active");
+      clearAITimer(); // Clear timer if not AI mode
+    }
     modeOptions.classList.remove("active");
     clearGrid();
-    if (isAIMode && Math.random() > 0.5 && !hasMoved) {
-      hasMoved = true;
-      setTimeout(makeAIMove, 500);
-    }
     clickSound.play();
   });
 });
@@ -107,10 +108,7 @@ difficultyOptions.querySelectorAll(".radial-option").forEach(option => {
     aiDifficulty = e.target.dataset.difficulty;
     difficultyOptions.classList.remove("active");
     clearGrid();
-    if (Math.random() > 0.5 && !hasMoved) {
-      hasMoved = true;
-      setTimeout(makeAIMove, 500);
-    }
+    startAITimer(); // Start timer after difficulty change
     clickSound.play();
   });
 });
@@ -260,6 +258,8 @@ function drawSymbol(event) {
   const index = [...cells].indexOf(cell);
   if (board[index]) return;
 
+  clearAITimer(); // Stop timer once player moves
+
   if (isOnlineMode) {
     const currentSymbol = isXNext ? "X" : "O";
     board[index] = currentSymbol;
@@ -277,7 +277,6 @@ function drawSymbol(event) {
     checkGameEnd();
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
-    hasMoved = true; // Mark player move
   } else {
     const currentSymbol = isXNext ? "X" : "O";
     board[index] = currentSymbol;
@@ -300,8 +299,7 @@ function drawSymbol(event) {
 
     isXNext = !isXNext;
     statusDisplay.textContent = `${isXNext ? "X" : "O"} Activates...`;
-    hasMoved = true; // Mark player move
-    if (isAIMode && !isXNext) setTimeout(makeAIMove, 500);
+    if (isAIMode && !isXNext) setTimeout(makeAIMove, 500); // AI moves after player
   }
 }
 
@@ -316,7 +314,7 @@ function processMoveQueue() {
 
 // AI Move
 function makeAIMove() {
-  if (!gameActive || isPaused || hasMoved) return; // Prevent double-tap
+  if (!gameActive || isPaused) return;
   const emptyCells = [...cells].filter((_, i) => !board[i]);
   if (emptyCells.length > 0) {
     let chosenCell;
@@ -327,8 +325,26 @@ function makeAIMove() {
     } else if (aiDifficulty === "pro") {
       chosenCell = getBestMove(emptyCells, "O", true);
     }
-    chosenCell.click();
-    hasMoved = true; // Mark AI move
+    chosenCell.click(); // AI makes a move
+  }
+}
+
+// AI Start Timer
+function startAITimer() {
+  clearAITimer(); // Clear any existing timer
+  if (isAIMode && gameActive && !isPaused) {
+    aiTimer = setTimeout(() => {
+      if (!board.some(cell => cell)) { // Only if no moves yet
+        makeAIMove();
+      }
+    }, 3000); // 3 seconds
+  }
+}
+
+function clearAITimer() {
+  if (aiTimer) {
+    clearTimeout(aiTimer);
+    aiTimer = null;
   }
 }
 
@@ -434,11 +450,10 @@ function clearGrid() {
   statusDisplay.textContent = "X Activates...";
   board = Array(9).fill(null);
   updateBoard();
-  hasMoved = false; // Reset move flag
   if (isOnlineMode && conn && conn.open) {
     conn.send({ type: "clear", board });
   }
-  if (isAIMode && Math.random() > 0.5) setTimeout(makeAIMove, 500); // AI can start
+  if (isAIMode) startAITimer(); // Restart timer in AI mode
   clickSound.play();
 }
 
@@ -487,6 +502,8 @@ pauseBtn.addEventListener("click", () => {
   isPaused = !isPaused;
   pauseBtn.textContent = isPaused ? "Resume" : "Pause";
   statusDisplay.textContent = isPaused ? "System Paused" : `${isXNext ? "X" : "O"} Activates...`;
+  if (isPaused) clearAITimer();
+  else if (isAIMode) startAITimer();
   clickSound.play();
 });
 
