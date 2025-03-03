@@ -46,7 +46,8 @@ let board = Array(9).fill(null);
 let moveQueue = [];
 let lastSyncTime = 0;
 let gameCode = null;
-let aiTimer = null; // For 3-second delay
+let aiTimer = null;
+let aiHasStarted = false; // New flag to track AI's initial move
 
 const winningCombinations = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -92,10 +93,10 @@ modeOptions.querySelectorAll(".radial-option").forEach(option => {
     toggleMultiplayerControls();
     if (isAIMode) {
       difficultyOptions.classList.add("active");
-      startAITimer(); // Start timer for AI mode
+      startAITimer();
     } else {
       difficultyOptions.classList.remove("active");
-      clearAITimer(); // Clear timer if not AI mode
+      clearAITimer();
     }
     modeOptions.classList.remove("active");
     clearGrid();
@@ -108,7 +109,7 @@ difficultyOptions.querySelectorAll(".radial-option").forEach(option => {
     aiDifficulty = e.target.dataset.difficulty;
     difficultyOptions.classList.remove("active");
     clearGrid();
-    startAITimer(); // Start timer after difficulty change
+    startAITimer();
     clickSound.play();
   });
 });
@@ -326,13 +327,14 @@ function makeAIMove() {
       chosenCell = getBestMove(emptyCells, "O", true);
     }
     chosenCell.click(); // AI makes a move
+    aiHasStarted = true; // Mark AI has started
   }
 }
 
 // AI Start Timer
 function startAITimer() {
-  clearAITimer(); // Clear any existing timer
-  if (isAIMode && gameActive && !isPaused) {
+  clearAITimer();
+  if (isAIMode && gameActive && !isPaused && !aiHasStarted) {
     aiTimer = setTimeout(() => {
       if (!board.some(cell => cell)) { // Only if no moves yet
         makeAIMove();
@@ -450,10 +452,11 @@ function clearGrid() {
   statusDisplay.textContent = "X Activates...";
   board = Array(9).fill(null);
   updateBoard();
+  aiHasStarted = false; // Reset AI start flag
   if (isOnlineMode && conn && conn.open) {
     conn.send({ type: "clear", board });
   }
-  if (isAIMode) startAITimer(); // Restart timer in AI mode
+  if (isAIMode) startAITimer();
   clickSound.play();
 }
 
