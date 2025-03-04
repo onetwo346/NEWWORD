@@ -14,6 +14,9 @@
       gtag('js', new Date());
       gtag('config', 'G-S5QGK47FS8');
     </script>
+    <!-- Google AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7171316187418642"
+     crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="container">
@@ -79,7 +82,6 @@
           </div>
         </div>
         <div class="control-panel">
-          <button id="instructionsBtn" class="neon-btn">Instructions</button>
           <button id="clearBtn" class="neon-btn">Clear Grid</button>
           <button id="restartBtn" class="neon-btn">Reset Grid</button>
           <button id="pauseBtn" class="neon-btn">Pause</button>
@@ -87,27 +89,10 @@
         </div>
         <p id="status" class="status-text">X Activates...</p>
         <div class="support-unit">
-          <a href="https://your-donation-link.com" target="_blank" class="qr-link">
-            <img src="donate.jpg" alt="Support via QR Code" class="support-qr" loading="lazy" />
-          </a>
+          <img src="donate.jpg" alt="Support QR" class="support-qr" />
           <p class="support-text">Fuel the Creator</p>
         </div>
         <p class="signature">Crafted by Nana Kofi Fosu</p>
-      </div>
-
-      <div class="instructions-modal" id="instructionsModal">
-        <div class="instructions-content">
-          <h2 class="neon-title">XOwars: Grid Mastery</h2>
-          <p>Welcome to the neon battlefield! Here’s how to dominate:</p>
-          <ul>
-            <li><strong>Modes:</strong> Local Duel (2 players), AI Clash (vs CPU), Online War (code-based).</li>
-            <li><strong>Play:</strong> Tap a cell to place X or O—anyone can start!</li>
-            <li><strong>Win:</strong> Align 3 symbols (row, column, diagonal).</li>
-            <li><strong>Online:</strong> Generate or join with a code, chat live.</li>
-            <li><strong>Controls:</strong> Clear, reset, pause, or exit anytime.</li>
-          </ul>
-          <button id="closeInstructions" class="neon-btn">Close</button>
-        </div>
       </div>
     </div>
     <audio id="clickSound" src="click.mp3"></audio>
